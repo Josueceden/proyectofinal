@@ -13,10 +13,15 @@ catalogo=record
 	end;
 	
 sacados = record
+	nombre:string;
+	apellido:string;
 	prestados: string;
+	limite:integer;
+	ID:longint;
 end;
 	
 var
+Horas, Minutos: Integer;
 valname,valastname,valCI:boolean;
 registros:array [1..80] of registro;
 Biblioteca:array [1..40] of catalogo;
@@ -149,10 +154,26 @@ BEGIN
 	Biblioteca[2].libros:='Cien años de soledad';
 	Biblioteca[3].libros:='Los viajes de Gulliver';
 	Biblioteca[4].libros:='El Principito';
+	Biblioteca[5].libros:='Don Quijote de la Mancha';
+	Biblioteca[6].libros:='Alicia en el país de las maravillas';
+	Biblioteca[7].libros:='Moby Dick';
+	Biblioteca[8].libros:='Los miserables';
+	Biblioteca[9].libros:='Drácula';
+	Biblioteca[10].libros:='El código Da Vinci';
+	Biblioteca[11].libros:='Las crónicas de Narnia';
+	Biblioteca[12].libros:='La Biblia';
+	Biblioteca[13].libros:='La divina comedia';
+	Biblioteca[14].libros:='Crepúsculo';
+	Biblioteca[15].libros:='Fahrenheit 451';
+	Biblioteca[16].libros:='Crónica de una muerte anunciada';
+	Biblioteca[17].libros:='El juego de Ender';
+	Biblioteca[18].libros:='El amor en los tiempos del cólera';
+	Biblioteca[19].libros:='El gran Gatsby';
+	Biblioteca[20].libros:='En busca del tiempo perdido';
 	
 		repeat
 		Begin
-			Writeln('¿Quire agregarlo como trabajo o libro?, si es libro presione "l" o si es trabajo presione "t"');
+			Writeln('¿Quiere agregarlo como trabajo o libro?, si es libro presione "l" o si es trabajo presione "t"');
 			readln(opcion); 
 			case opcion of
 				'l': Begin
@@ -234,7 +255,7 @@ BEGIN
 				writeln('Bienvenido, escriba el nombre del libro o trabajo quiere pedir prestado de nuestro biblioteca');
 				repeat
 				Begin
-						For f:=1 to 5 do
+						For f:=1 to 21 do
 						Begin
 							Begin
 								if Biblioteca[f].libros=' ' then
@@ -249,6 +270,7 @@ BEGIN
 								end;
 							end;
 						end;
+						l:=l+1;
 						readln(eleccion);
 						clrscr;
 						prestamo[l].prestados:=Biblioteca[eleccion].libros;
@@ -332,18 +354,32 @@ BEGIN
 	end;				
 END;
 
+procedure AvanzarReloj();
+begin
+	Minutos := Minutos + 15;
+	if Minutos >= 60 then
+		begin
+			Minutos := Minutos - 60;
+			Horas := Horas + 1;
+			if Horas >= 24 then
+				Horas := 0;
+		end;
+end;
 
 
 var
 opcion: char;
-time:real;
+HoraActual, MinutoActual: Integer;
 
 BEGIN
-	time:=7.30;
+		Horas := 8;
+		Minutos := 15;
 	repeat
-	Begin
-		time:=time+1.00;
-		writeln(time:2:2);
+	begin
+		AvanzarReloj;
+	    HoraActual := Horas;
+		MinutoActual := Minutos;
+		writeln('Hora Actual: ', Horas, ':', Minutos);
 		writeln('Escriba el número de la acción que quieres realizar');
 		writeln();
 		writeln('1. Registrarse');
@@ -353,6 +389,7 @@ BEGIN
 		writeln('0. Salir');
 		writeln();
 		readln(opcion);
+		clrscr;
 		case opcion of
 			'1': begin
 					regisalum;
@@ -372,10 +409,17 @@ BEGIN
 			else
 			Begin
 				writeln('No existe esa opción');
+				readln();
+				clrscr;
 			End;
 		end;
 	end;
-	until (opcion ='0') or (time=16.30);		
+	if (HoraActual=16) and (MinutoActual=30) then
+	begin
+		writeln('Ya son las 16:30, es hora de cerrar la biblioteca por hoy');
+		break;
+	end;
+	until (opcion ='0') or (HoraActual=16) and (MinutoActual=30);		
 	
 	
 END.
