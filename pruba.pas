@@ -1,6 +1,6 @@
 program untitled;
 {$codepage UTF8}
-uses crt;
+uses crt,sysutils;
 type
 registro =record
 	name: string;
@@ -143,13 +143,16 @@ BEGIN
 	
 END;
 
-procedure newbook();
+procedure revislibtra(var Biblioteca: array of catalogo; prestamo: array of sacados);
 var
-opcion: char;
-const
-i:integer=4;
-l: integer=0;
-BEGIN
+  i: integer;
+
+begin
+  for i := 1 to 40 do
+  begin
+    Biblioteca[i].trabajos := '';
+  end;
+
 	Biblioteca[1].libros:='Frankenstein';
 	Biblioteca[2].libros:='Cien años de soledad';
 	Biblioteca[3].libros:='Los viajes de Gulliver';
@@ -170,6 +173,28 @@ BEGIN
 	Biblioteca[18].libros:='El amor en los tiempos del cólera';
 	Biblioteca[19].libros:='El gran Gatsby';
 	Biblioteca[20].libros:='En busca del tiempo perdido';
+	
+	Writeln('Tenemos los siguientes trabajos y libros disponibles');
+	for i := 1 to 80 do
+		begin
+			if CompareStr(Biblioteca[i].libros, prestamo[i].prestados) = 0 then
+				begin
+				end
+			else
+				begin
+					Writeln(i, ' ', Biblioteca[i].libros,' ',i, ' ', Biblioteca[i].trabajos);
+				end;
+		end;
+end;
+
+procedure newbook(var Biblioteca: array of catalogo);
+var
+opcion: char;
+i,l:integer;
+
+BEGIN
+	i:=20;
+	l:=0;
 	
 		repeat
 		Begin
@@ -217,9 +242,9 @@ END;
 
 procedure registrablib (var registros:array of registro; prestamo: array of sacados);
 var
-a,m,f,eleccion:integer;
+a,m,eleccion:integer;
 ID:longint;
-valID, visible: boolean;
+valID: boolean;
 opcion: char;
 const
 l: integer = 0;
@@ -253,56 +278,32 @@ BEGIN
 			if (registros[a].cedula=ID) then
 			begin
 				writeln('Bienvenido, escriba el nombre del libro o trabajo quiere pedir prestado de nuestro biblioteca');
+				opcion:=' ';
+				l:=l+1;
 				repeat
 				Begin
-						For f:=1 to 21 do
-						Begin
-							Begin
-								if Biblioteca[f].libros=' ' then
-								Begin 
-									visible:= false;
-									clrscr;
-								end
-								else
-								Begin
-									Writeln(f,'',Biblioteca[f].libros);
-									visible:=true
-								end;
-							end;
-						end;
-						l:=l+1;
-						readln(eleccion);
-						clrscr;
-						prestamo[l].prestados:=Biblioteca[eleccion].libros;
-						if l=80 then
-						Begin
-							writeln('Lo lamentamos, pero ya se han hecho prestamo de todos los trabajos y libros disponibles');
-						end
-						else
-						Begin
-							for m:=0 to l-1 do
-							begin
-								if prestamo[m].prestados <> prestamo[l].prestados then
-								Begin
-									Writeln('espere...');
-									delay(2000);
-									clrscr;
-								end
-								else
-								Begin
-									writeln('Libro prestado, puede elegir otro libro o trabajo escribiendo "2" o esperar a que llegue escribiendo "n"');
-									Readln(opcion);
-									clrscr;
-									break;
-								end;
-							end;	
-						end;
-					end;
-					until (prestamo[m].prestados<>prestamo[l].prestados) or (opcion = 'n');
-					writeln('Prestamo aprobado, tiene hasta tres días para devovleverlo sino será sancionado');
-					delay(5000);
+					revislibtra(Biblioteca, prestamo);
+					readln(eleccion);
 					clrscr;
-					break;
+					prestamo[l].prestados := Biblioteca[eleccion].libros;
+					for m:= 0 to l-1 do
+					if CompareStr(prestamo[l].prestados, prestamo[m].prestados) = 0 then
+					begin
+						writeln('El libro ya está prestado.');
+						writeln('¿Desea elegir otro libro? (s/n)');
+						readln(opcion);
+						clrscr;
+					end
+					else
+					begin
+						writeln('Prestamo aprobado, tiene hasta tres días para devolverlo sino será sancionado');
+						delay(5000);
+						clrscr;
+						break;
+					end;
+				end;
+				until (not (CompareStr(prestamo[m].prestados, prestamo[l].prestados) = 0)) or (opcion = 'n');
+				break;
 			end
 			else
 			Begin
@@ -326,32 +327,6 @@ BEGIN
 	Begin
 		writeln('No hay registros');
 	end;
-END;
-
-procedure revislibtra (var Biblioteca: array of catalogo; prestamo: array of sacados);
-var
-i,f:integer;
-
-BEGIN
-	Biblioteca[1].libros:='Frankenstein';
-	Biblioteca[2].libros:='Cien años de soledad';
-	Biblioteca[3].libros:='Los viajes de Gulliver';
-	Biblioteca[4].libros:='El Principito';
-	for i:=1 to 40 do
-	Begin
-		for f:= 1 to 80 do
-		Begin
-			if (Biblioteca[i].libros = prestamo[f].prestados) or (Biblioteca[i].trabajos= prestamo[f].prestados) then
-			Begin
-				writeln(' ');
-			end
-			else
-			Begin
-				Writeln('Tenemos los siguientes trabajos y libros disponibles');
-				writeln(f,'',Biblioteca[i].libros);
-			end;
-		end;
-	end;				
 END;
 
 procedure AvanzarReloj();
@@ -401,7 +376,7 @@ BEGIN
 					revislibtra (Biblioteca, prestamo);
 				end;
 			'4': Begin
-					newbook;
+					newbook(Biblioteca);
 				end;
 			'0': Begin
 				writeln('Se va a cerrar sesión');
