@@ -13,19 +13,30 @@ catalogo=record
 	end;
 	
 sacados = record
-	nombre:string;
-	apellido:string;
+	name:string;
+	lastname:string;
 	prestados: string;
-	limite:integer;
+	dias:real;
 	ID:longint;
 end;
-	
+    lista = record
+        name: string;
+        lastname: string;
+        dias: real;
+        prestado: string;
+        ID: longint;
+    end;
+ 
+
 var
 Horas, Minutos: Integer;
 valname,valastname,valCI:boolean;
 registros:array [1..80] of registro;
 Biblioteca:array [1..40] of catalogo;
 prestamo: array  [1..80] of sacados;
+sanciones: array [1..80] of lista;
+const
+contadorprestamos:integer=0;
 
 procedure regisalum();
 var 
@@ -180,9 +191,10 @@ begin
 	Biblioteca[10].trabajos:='La comunicación horizontal y la comunicación vertical en relación con la eficiencia';
 	
 	Writeln('Tenemos los siguientes libros disponibles');
-	for i := 1 to 80 do
+	for i := 1 to length(Biblioteca)-1 do
 		begin
-			if (CompareStr(Biblioteca[i].libros, prestamo[i].prestados) = 0) then
+			
+			if (Biblioteca[i].libros= '') and (CompareStr(Biblioteca[i].libros, prestamo[i].prestados) = 0) then
 				begin
 				end
 			else
@@ -190,12 +202,12 @@ begin
 					Writeln(i, ' ', Biblioteca[i].libros);
 				end;
 		end;
-	delay(10000);
+	delay(7000);
 	clrscr;
 	Writeln('Tenemos los siguientes trabajos disponibles');
-	for i := 1 to 80 do
+	for i := 1 to length(Biblioteca)-1 do
 		begin
-			if (CompareStr(Biblioteca[i].trabajos, prestamo[i].prestados) = 0) then
+			if (Biblioteca[i].trabajos= '') and (CompareStr(Biblioteca[i].trabajos, prestamo[i].prestados) = 0) then
 				begin
 				end
 			else
@@ -203,19 +215,19 @@ begin
 					Writeln(i, ' ', Biblioteca[i].trabajos);
 				end;
 		end;
-	Delay(10000);
+	Delay(7000);
 	clrscr;	
 end;
 
 procedure newbook(var Biblioteca: array of catalogo);
+const
+l:integer=10;
+i:integer=20;
+
 var
 opcion: char;
-i,l:integer;
 
 BEGIN
-	i:=20;
-	l:=0;
-	
 		repeat
 		Begin
 			Writeln('¿Quiere agregarlo como trabajo o libro?, si es libro presione "l" o si es trabajo presione "t"');
@@ -225,7 +237,7 @@ BEGIN
 					if i<40 then
 					begin
 						i:= i + 1;
-						writeln('Aun tenemos espacio para almacenar su libro, diganos el nombre de su libro');
+						writeln('Aun tenemos espacio para almacenar su libro, escriba el nombre del libro');
 						readln(Biblioteca[i].libros);
 						clrscr;
 						Writeln('Ahora el libro ',Biblioteca[i].libros ,' esta en nuestro biblioteca disponible');
@@ -240,8 +252,8 @@ BEGIN
 					if l<40 then
 					Begin
 						l:= l + 1;
-						writeln('Aun tenemos espacio para almacenar su libro');
-						readln(Biblioteca[i].trabajos);
+						writeln('Aun tenemos espacio para almacenar su trabajo, escriba el nombre del trabajo');
+						readln(Biblioteca[l].trabajos);
 						clrscr;
 						Writeln('Ahora el trabajo ',Biblioteca[l].trabajos ,' esta en nuestro biblioteca disponible');
 						delay(2000);
@@ -260,14 +272,13 @@ BEGIN
 		until (opcion='t') or (opcion='T') or (opcion='l') or (opcion='L');	
 END;
 
-procedure registrablib (var registros:array of registro; prestamo: array of sacados);
+procedure registrablib (var registros:array of registro; prestamo: array of sacados; contadorprestamos:integer);
 var
-a,m,eleccion:integer;
+a,m,eleccion,posicion:integer;
 ID:longint;
 valID: boolean;
 opcion,opcion2: char;
-const
-l: integer = 0;
+
 
 
 BEGIN
@@ -297,11 +308,20 @@ BEGIN
 		begin
 			if (registros[a].cedula=ID) then
 			begin
+				posicion:=a;
+				writeln(registros[posicion].name);
+				writeln(registros[posicion].lastname);
+				writeln(registros[posicion].cedula);
+				readln;
 				writeln('Bienvenido, escriba el nombre del libro o trabajo quiere pedir prestado de nuestro biblioteca');
 				opcion:=' ';
-				l:=l+1;
+				contadorprestamos:=contadorprestamos+1;
 				repeat
 				Begin
+					prestamo[contadorprestamos].name := registros[posicion].name;
+					prestamo[contadorprestamos].lastname:=registros[posicion].lastname;
+					prestamo[contadorprestamos].ID:=registros[posicion].cedula;
+					prestamo[contadorprestamos].dias:=3;
 					revislibtra(Biblioteca, prestamo);
 					writeln('De lo mostrado, que quiere pedir prestado "l" para libros y "t" para trabajos');
 					readln(opcion2);
@@ -312,23 +332,24 @@ BEGIN
 								Writeln('Escribe el número del libro de su elección');
 								readln(eleccion);
 								clrscr;
-								prestamo[l].prestados := Biblioteca[eleccion].libros;
+								prestamo[contadorprestamos].prestados := Biblioteca[eleccion].libros;
 							end;
 							't':Begin
 								Writeln('Escribe el número del trabajo de su elección');
 								readln(eleccion);
 								clrscr;
-								prestamo[l].prestados := Biblioteca[eleccion].trabajos;
+								prestamo[contadorprestamos].prestados := Biblioteca[eleccion].trabajos;
 							End
 							else
 							Begin
 								writeln('Opción no existente');
+								break;
 							end;
 						end;
 					end;
 					until (opcion2='t') or (opcion2='l');
-					for m:= 0 to l-1 do
-					if CompareStr(prestamo[l].prestados, prestamo[m].prestados) = 0 then
+					for m:= 0 to contadorprestamos-1 do
+					if CompareStr(prestamo[contadorprestamos].prestados, prestamo[m].prestados) = 0 then
 					begin
 						writeln('El libro ya está prestado.');
 						writeln('¿Desea elegir otro libro? (s/n)');
@@ -343,7 +364,7 @@ BEGIN
 						break;
 					end;
 				end;
-				until (not (CompareStr(prestamo[m].prestados, prestamo[l].prestados) = 0)) or (opcion = 'n');
+				until (not (CompareStr(prestamo[m].prestados, prestamo[contadorprestamos].prestados) = 0)) or (opcion = 'n');
 				break;
 			end
 			else
@@ -370,6 +391,130 @@ BEGIN
 	end;
 END;
 
+procedure listactivos (var prestamo: array of sacados; contadorprestamos:integer);
+var
+f, num, activos: integer;
+
+begin
+    activos := 0; // Variable para llevar un seguimiento de los préstamos activos
+    num := 4; // Variable para llevar un seguimiento del número de sanciones
+
+
+    prestamo[2].name := 'Pancho';
+    prestamo[2].lastname := 'J';
+    prestamo[2].prestados := 'Don quijote';
+    prestamo[2].ID := 32132121;
+    prestamo[2].dias := 3;
+    // Verificar y procesar préstamos activos
+    if (length(prestamo) > 0) then
+    begin
+        for f := 0 to length(prestamo)-1 do
+        begin
+            // Solo procesar préstamos activos (no vacíos)
+            if prestamo[f].name <> '' then
+            begin
+                if prestamo[f].dias = 0 then
+                begin
+                    num := num + 1;
+                    sanciones[num].name := prestamo[f].name;
+                    sanciones[num].lastname := prestamo[f].lastname;
+                    sanciones[num].ID := prestamo[f].ID;
+                    sanciones[num].prestado := prestamo[f].prestados;
+                    sanciones[num].dias := 7;
+                    writeln(sanciones[num].name, ' ', sanciones[num].lastname, ' Se le acabo el tiempo de prestamo, desde este momento esta sancinado');
+                    prestamo[f].name := '';
+                    prestamo[f].lastname := '';
+                    prestamo[f].prestados := '';
+                    prestamo[f].ID := 0;
+                    activos := activos - 1; // Disminuir el número de préstamos activos
+                    break;
+                end
+                else
+                begin
+                    Writeln('Nombre: ', prestamo[f].name, ' ', prestamo[f].lastname);
+                    writeln('Prestamo: ', prestamo[f].prestados);
+                    prestamo[f].dias := prestamo[f].dias - 0.01;
+                    writeln('Tiempo restante: ', prestamo[f].dias:2:2);
+                    delay(4000);
+                    clrscr;
+                end;
+            end;
+        end;
+    end
+    else
+    begin
+        Writeln('No hay ningun prestamo activo');
+    end;
+end;
+
+
+procedure listsancion (sanciones:array of lista);
+var
+f, sancionados: integer;
+
+begin
+    sancionados := 0; // Variable para llevar un seguimiento de los préstamos activos
+
+    sanciones[2].name := 'Pancho';
+    sanciones[2].lastname := 'J';
+    sanciones[2].prestado := 'Don quijote';
+    sanciones[2].ID := 32132121;
+    sanciones[2].dias := 3;
+    // Verificar y procesar préstamos activos
+    if (length(sanciones) > 0) then
+    begin
+        for f := 1 to length(sanciones)-1 do
+        begin
+            // Solo procesar préstamos activos (no vacíos)
+            if sanciones[f].name <> '' then
+            begin
+                if sanciones[f].dias = 0 then
+                begin
+                    writeln(sanciones[f].name, ' ', sanciones[f].lastname, ' Se le acabo el tiempo de sanciones, desde este momento esta sancinado');
+                    sanciones[f].name := '';
+                    sanciones[f].lastname := '';
+                    sanciones[f].prestado := '';
+                    sanciones[f].ID := 0;
+                    sancionados := sancionados - 1; // Disminuir el número de préstamos activos
+                    break;
+                end
+                else
+                begin
+                    Writeln('Nombre: ', sanciones[f].name, ' ', sanciones[f].lastname);
+                    writeln('sanciones: ', sanciones[f].prestado);
+                    sanciones[f].dias := sanciones[f].dias - 0.01;
+                    writeln('Tiempo restante: ', sanciones[f].dias:2:2);
+                    delay(4000);
+                    clrscr;
+                end;
+            end;
+        end;
+    end
+    else
+    begin
+        Writeln('No hay ningun sanciones activo');
+    end;
+end;
+
+
+procedure DiaSemana (var MinutoActual:integer; HoraActual:integer);
+const
+DiasSemana: array[1..5] of string = ('Lunes','Martes','Miercoles','Jueves','Viernes');
+p:integer=0;
+
+
+Begin
+	if (HoraActual=8) and (MinutoActual=30) then
+		begin
+			p:=p+1;
+			writeln(DiasSemana[p]);
+		end
+	else
+		begin
+			writeln(DiasSemana[p]);
+		end;
+end;
+
 procedure AvanzarReloj();
 begin
 	Minutos := Minutos + 15;
@@ -377,8 +522,11 @@ begin
 		begin
 			Minutos := Minutos - 60;
 			Horas := Horas + 1;
-			if Horas >= 24 then
-				Horas := 0;
+			if (Horas >= 16) and (Minutos >=30) then
+			begin
+				Horas := 8;
+				Minutos:=15;
+			end;
 		end;
 end;
 
@@ -392,9 +540,15 @@ BEGIN
 		Minutos := 15;
 	repeat
 	begin
+		if (Horas >= 16) and (Minutos >=30) then
+			begin
+				Horas := 8;
+				Minutos:=15;
+			end;
 		AvanzarReloj;
 	    HoraActual := Horas;
 		MinutoActual := Minutos;
+		DiaSemana(MinutoActual,HoraActual);
 		writeln('Hora Actual: ', Horas, ':', Minutos);
 		writeln('Escriba el número de la acción que quieres realizar');
 		writeln();
@@ -402,6 +556,8 @@ BEGIN
 		writeln('2. Sacar un libro');
 		Writeln('3. Revisar los libros disponibles');
 		Writeln('4. Ingresar un nuevo libros');
+		writeln('5. Revisar prestamos activos');
+		writeln('6. Revisar sanciones');
 		writeln('0. Salir');
 		writeln();
 		readln(opcion);
@@ -411,13 +567,19 @@ BEGIN
 					regisalum;
 				End;
 			'2': begin
-					registrablib(registros, prestamo);
+					registrablib(registros, prestamo,contadorprestamos);
 				end;
 			'3': Begin
 					revislibtra (Biblioteca, prestamo);
 				end;
 			'4': Begin
 					newbook(Biblioteca);
+				end;
+			'5': Begin
+					listactivos(prestamo,contadorprestamos);
+				end;
+			'6': Begin
+					listsancion(sanciones);
 				end;
 			'0': Begin
 				writeln('Se va a cerrar sesión');
@@ -430,12 +592,7 @@ BEGIN
 			End;
 		end;
 	end;
-	if (HoraActual=16) and (MinutoActual=30) then
-	begin
-		writeln('Ya son las 16:30, es hora de cerrar la biblioteca por hoy');
-		break;
-	end;
-	until (opcion ='0') or (HoraActual=16) and (MinutoActual=30);		
+	until (opcion ='0');		
 	
 	
 END.
