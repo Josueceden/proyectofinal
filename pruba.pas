@@ -272,13 +272,14 @@ BEGIN
 		until (opcion='t') or (opcion='T') or (opcion='l') or (opcion='L');	
 END;
 
-procedure registrablib (var registros:array of registro; prestamo: array of sacados; contadorprestamos:integer);
+procedure registrablib (var registros:array of registro);
 var
 a,m,eleccion,posicion:integer;
 ID:longint;
 valID: boolean;
 opcion,opcion2: char;
-
+const
+l:integer=0;
 
 
 BEGIN
@@ -313,16 +314,16 @@ BEGIN
 				writeln(registros[posicion].lastname);
 				writeln(registros[posicion].cedula);
 				readln;
-				writeln('Bienvenido, escriba el nombre del libro o trabajo quiere pedir prestado de nuestro biblioteca');
 				opcion:=' ';
-				contadorprestamos:=contadorprestamos+1;
+				l:=l+1;
 				repeat
 				Begin
-					prestamo[contadorprestamos].name := registros[posicion].name;
-					prestamo[contadorprestamos].lastname:=registros[posicion].lastname;
-					prestamo[contadorprestamos].ID:=registros[posicion].cedula;
-					prestamo[contadorprestamos].dias:=3;
+					prestamo[l].name := registros[posicion].name;
+					prestamo[l].lastname:=registros[posicion].lastname;
+					prestamo[l].ID:=registros[posicion].cedula;
+					prestamo[l].dias:=3;
 					revislibtra(Biblioteca, prestamo);
+					writeln(prestamo[l].name);
 					writeln('De lo mostrado, que quiere pedir prestado "l" para libros y "t" para trabajos');
 					readln(opcion2);
 					repeat
@@ -332,13 +333,13 @@ BEGIN
 								Writeln('Escribe el número del libro de su elección');
 								readln(eleccion);
 								clrscr;
-								prestamo[contadorprestamos].prestados := Biblioteca[eleccion].libros;
+								prestamo[l].prestados := Biblioteca[eleccion].libros;
 							end;
 							't':Begin
 								Writeln('Escribe el número del trabajo de su elección');
 								readln(eleccion);
 								clrscr;
-								prestamo[contadorprestamos].prestados := Biblioteca[eleccion].trabajos;
+								prestamo[l].prestados := Biblioteca[eleccion].trabajos;
 							End
 							else
 							Begin
@@ -347,9 +348,12 @@ BEGIN
 							end;
 						end;
 					end;
+					
 					until (opcion2='t') or (opcion2='l');
-					for m:= 0 to contadorprestamos-1 do
-					if CompareStr(prestamo[contadorprestamos].prestados, prestamo[m].prestados) = 0 then
+					
+					
+					for m:= 0 to l do
+					if CompareStr(prestamo[l].prestados, prestamo[m].prestados) = 0 then
 					begin
 						writeln('El libro ya está prestado.');
 						writeln('¿Desea elegir otro libro? (s/n)');
@@ -364,7 +368,7 @@ BEGIN
 						break;
 					end;
 				end;
-				until (not (CompareStr(prestamo[m].prestados, prestamo[contadorprestamos].prestados) = 0)) or (opcion = 'n');
+				until (not (CompareStr(prestamo[m].prestados, prestamo[l].prestados) = 0)) or (opcion = 'n');
 				break;
 			end
 			else
@@ -389,6 +393,7 @@ BEGIN
 	Begin
 		writeln('No hay registros');
 	end;
+	writeln(prestamo[l].name);
 END;
 
 procedure listactivos (var prestamo: array of sacados; contadorprestamos:integer);
@@ -399,16 +404,13 @@ begin
     activos := 0; // Variable para llevar un seguimiento de los préstamos activos
     num := 4; // Variable para llevar un seguimiento del número de sanciones
 
-
-    prestamo[2].name := 'Pancho';
-    prestamo[2].lastname := 'J';
-    prestamo[2].prestados := 'Don quijote';
-    prestamo[2].ID := 32132121;
-    prestamo[2].dias := 3;
     // Verificar y procesar préstamos activos
     if (length(prestamo) > 0) then
+   
     begin
-        for f := 0 to length(prestamo)-1 do
+    
+        for f := 0 to 3 do
+        
         begin
             // Solo procesar préstamos activos (no vacíos)
             if prestamo[f].name <> '' then
@@ -433,9 +435,9 @@ begin
                 begin
                     Writeln('Nombre: ', prestamo[f].name, ' ', prestamo[f].lastname);
                     writeln('Prestamo: ', prestamo[f].prestados);
-                    prestamo[f].dias := prestamo[f].dias - 0.01;
+                    prestamo[f].dias := prestamo[f].dias - 0.09;
                     writeln('Tiempo restante: ', prestamo[f].dias:2:2);
-                    delay(4000);
+                    readln();
                     clrscr;
                 end;
             end;
@@ -567,7 +569,7 @@ BEGIN
 					regisalum;
 				End;
 			'2': begin
-					registrablib(registros, prestamo,contadorprestamos);
+					registrablib(registros);
 				end;
 			'3': Begin
 					revislibtra (Biblioteca, prestamo);
