@@ -148,11 +148,6 @@ var
   i: integer;
 
 begin
-  for i := 1 to 40 do
-  begin
-    Biblioteca[i].trabajos := '';
-  end;
-
 	Biblioteca[1].libros:='Frankenstein';
 	Biblioteca[2].libros:='Cien años de soledad';
 	Biblioteca[3].libros:='Los viajes de Gulliver';
@@ -173,18 +168,43 @@ begin
 	Biblioteca[18].libros:='El amor en los tiempos del cólera';
 	Biblioteca[19].libros:='El gran Gatsby';
 	Biblioteca[20].libros:='En busca del tiempo perdido';
+	Biblioteca[1].trabajos:='El rol del mediador en la mediación judicial';
+	Biblioteca[2].trabajos:='El juego para la enseñanza de las matemáticas';
+	Biblioteca[3].trabajos:='El uso de hormigón reciclado en la construcción';
+	Biblioteca[4].trabajos:='Los tratamientos efectivos para los ataques de pánico';
+	Biblioteca[5].trabajos:='El rol fundamental del periodismo en el cuidado del medioambiente';
+	Biblioteca[6].trabajos:='La crónica literaria como alternativa al periodismo tradicional';
+	Biblioteca[7].trabajos:='La recuperación de deportistas de alto rendimiento que han sufrido una lesión';
+	Biblioteca[8].trabajos:='Análisis comparado de democracias federalistas';
+	Biblioteca[9].trabajos:='Impresión 3D para fabricación de prótesis';
+	Biblioteca[10].trabajos:='La comunicación horizontal y la comunicación vertical en relación con la eficiencia';
 	
-	Writeln('Tenemos los siguientes trabajos y libros disponibles');
+	Writeln('Tenemos los siguientes libros disponibles');
 	for i := 1 to 80 do
 		begin
-			if CompareStr(Biblioteca[i].libros, prestamo[i].prestados) = 0 then
+			if (CompareStr(Biblioteca[i].libros, prestamo[i].prestados) = 0) then
 				begin
 				end
 			else
 				begin
-					Writeln(i, ' ', Biblioteca[i].libros,' ',i, ' ', Biblioteca[i].trabajos);
+					Writeln(i, ' ', Biblioteca[i].libros);
 				end;
 		end;
+	delay(10000);
+	clrscr;
+	Writeln('Tenemos los siguientes trabajos disponibles');
+	for i := 1 to 80 do
+		begin
+			if (CompareStr(Biblioteca[i].trabajos, prestamo[i].prestados) = 0) then
+				begin
+				end
+			else
+				begin
+					Writeln(i, ' ', Biblioteca[i].trabajos);
+				end;
+		end;
+	Delay(10000);
+	clrscr;	
 end;
 
 procedure newbook(var Biblioteca: array of catalogo);
@@ -245,7 +265,7 @@ var
 a,m,eleccion:integer;
 ID:longint;
 valID: boolean;
-opcion: char;
+opcion,opcion2: char;
 const
 l: integer = 0;
 
@@ -283,9 +303,30 @@ BEGIN
 				repeat
 				Begin
 					revislibtra(Biblioteca, prestamo);
-					readln(eleccion);
-					clrscr;
-					prestamo[l].prestados := Biblioteca[eleccion].libros;
+					writeln('De lo mostrado, que quiere pedir prestado "l" para libros y "t" para trabajos');
+					readln(opcion2);
+					repeat
+					Begin
+						case opcion2 of
+							'l': Begin
+								Writeln('Escribe el número del libro de su elección');
+								readln(eleccion);
+								clrscr;
+								prestamo[l].prestados := Biblioteca[eleccion].libros;
+							end;
+							't':Begin
+								Writeln('Escribe el número del trabajo de su elección');
+								readln(eleccion);
+								clrscr;
+								prestamo[l].prestados := Biblioteca[eleccion].trabajos;
+							End
+							else
+							Begin
+								writeln('Opción no existente');
+							end;
+						end;
+					end;
+					until (opcion2='t') or (opcion2='l');
 					for m:= 0 to l-1 do
 					if CompareStr(prestamo[l].prestados, prestamo[m].prestados) = 0 then
 					begin
